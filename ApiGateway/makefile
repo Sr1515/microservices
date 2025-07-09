@@ -1,9 +1,3 @@
-build: 
-	docker compose up --build --remove-orphans -d
-
-logs:
-	docker compose logs -f
-
 run: 
 	python3 manage.py runserver
 

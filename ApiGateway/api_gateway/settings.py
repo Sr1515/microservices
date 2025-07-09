@@ -10,10 +10,12 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.environment', '.env.django'))
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
+JWT_SECRET = env('JWT_SECRET')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1'])
 
 INSTALLED_APPS = [
+    'rest_framework_simplejwt',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -21,8 +23,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    
     'rest_framework',
-    'rest_framework_simplejwt',
     'gateway'
 ]
 
@@ -37,18 +39,19 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
 }
 
+
 SIMPLE_JWT = {
-    'SIGNING_KEY': SECRET_KEY,
+    'SIGNING_KEY': JWT_SECRET,  
+    'ALGORITHM': 'HS256',
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'AUTH_HEADER_TYPES': ('Bearer',),
+    # 'USER_ID_FIELD': 'user_id', 
+    # 'USER_ID_CLAIM': 'user_id', 
+    'VERIFYING_KEY': None,
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
 ROOT_URLCONF = 'api_gateway.urls'

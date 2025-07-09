@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from "bcrypt"
 import { JwtService } from '@nestjs/jwt';
 import { Prisma, User } from 'generated/prisma';
+import { v4 as uuidv4 } from "uuid"
 
 @Injectable()
 export class AuthService {
@@ -58,11 +59,18 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        const accessToken = await this.jwtService.signAsync({
-            id: user.id,
-            name: user.name,
-            email: user.email
-        })
+        const accessToken = await this.jwtService.signAsync(
+            {
+                user_id: 1,
+                email: user.email,
+                name: user.name,
+                token_type: 'access',
+                jti: uuidv4(),
+            },
+            {
+                expiresIn: '30m',
+            }
+        );
 
         return { accessToken };
 

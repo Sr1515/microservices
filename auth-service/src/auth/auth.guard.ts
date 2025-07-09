@@ -19,7 +19,12 @@ export class AuthGuard implements CanActivate {
                 secret: jwtConstants.secret
             });
 
-            request['user'] = payload
+            if (!payload?.user_id) {
+                throw new UnauthorizedException('Token has no user_id');
+            }
+
+            request['user'] = payload;
+
         } catch (error) {
             throw new UnauthorizedException();
         }

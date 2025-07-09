@@ -6,4 +6,5 @@ urlpatterns = [
     path('auth/signin/', SignInView.as_view()),
     path('auth/users/', UserListView.as_view()),
     path('auth/users/<str:user_id>/', UserDetailView.as_view()),
+
 ]
