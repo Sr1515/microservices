@@ -12,7 +12,7 @@ db.sqlite3
 !.env.example
 
 # Ignora tudo na pasta .environment, exceto o .env de exemplo
-.environment/
+.environment/.env.django
 !.environment/.env.django.example
 
 # IDEs e editores
