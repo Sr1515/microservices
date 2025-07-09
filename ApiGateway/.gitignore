@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.log
+
+# Banco de dados SQLite
+db.sqlite3
+
+# Arquivos de ambiente
+.env
+*.env
+!.env.example
+
+# Ignora tudo na pasta .environment, exceto o .env de exemplo
+.environment/
+!.environment/.env.django.example
+
+# IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache do sistema operacional
+.DS_Store
+
+# Bytecode
+*.pyc
+*.pyo
+*.pyd
+
+# */migrations/
+# !*/migrations/__init__.py
