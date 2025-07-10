@@ -1,5 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { S3Client, PutObjectCommand, HeadBucketCommand, CreateBucketCommand, PutBucketPolicyCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, HeadBucketCommand, CreateBucketCommand, PutBucketPolicyCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { randomUUID } from "crypto";
 import { ConfigService } from '@nestjs/config';
 
@@ -24,6 +24,18 @@ export class S3Service {
         });
     }
 
+    async deleteFile(key: string): Promise<void> {
+        try {
+            await this.s3.send(new DeleteObjectCommand({
+                Bucket: this.bucketName,
+                Key: key,
+            }));
+            this.logger.log(`Arquivo "${key}" deletado do bucket "${this.bucketName}".`);
+        } catch (error) {
+            this.logger.error(`Erro ao deletar arquivo "${key}":`, error);
+            throw error;
+        }
+    }
 
     async setPublicBucketPolicy(): Promise<void> {
         const policy = {
