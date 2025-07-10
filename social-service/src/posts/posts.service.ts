@@ -83,11 +83,9 @@ export class PostService {
             return updated;
 
         } catch (error) {
-            console.error(error);
             throw new InternalServerErrorException('Erro in update post');
         }
     }
-
 
     async deleteById(id: string): Promise<Post> {
         try {

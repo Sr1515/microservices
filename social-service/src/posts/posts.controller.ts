@@ -14,7 +14,7 @@ import {
     UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PostService } from './post.service';
+import { PostService } from './posts.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdatePostDto } from './dtos/posts';
 
