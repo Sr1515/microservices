@@ -3,7 +3,6 @@ import { S3Client, PutObjectCommand, HeadBucketCommand, CreateBucketCommand, Put
 import { randomUUID } from "crypto";
 import { ConfigService } from '@nestjs/config';
 
-
 @Injectable()
 export class S3Service {
     private readonly logger = new Logger(S3Service.name);
@@ -74,6 +73,18 @@ export class S3Service {
         }
     }
 
+    private getContentType(filename: string): string {
+        const ext = filename.split('.').pop()?.toLowerCase();
+        switch (ext) {
+            case 'avif': return 'image/avif';
+            case 'png': return 'image/png';
+            case 'jpg':
+            case 'jpeg': return 'image/jpeg';
+            case 'gif': return 'image/gif';
+            default: return 'application/octet-stream';
+        }
+    }
+
     async uploadFile(file: Express.Multer.File): Promise<string> {
 
         await this.createBucketIfNotExists();
@@ -84,7 +95,7 @@ export class S3Service {
             Bucket: this.bucketName,
             Key: key,
             Body: file.buffer,
-            ContentType: file.mimetype,
+            ContentType: this.getContentType(file.originalname),
         }));
 
         return `http://localhost:9000/${this.bucketName}/${key}`

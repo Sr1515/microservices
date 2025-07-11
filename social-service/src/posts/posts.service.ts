@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Post } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { S3Service } from 'src/s3/s3.service';
@@ -13,7 +13,6 @@ export class PostService {
     ) { }
 
     async create(data: { content?: string; image?: Express.Multer.File; userId: string }): Promise<Post | null> {
-
         try {
             let imageUrl: string | null = null;
 
@@ -21,39 +20,62 @@ export class PostService {
                 imageUrl = await this.s3.uploadFile(data.image);
             }
 
-            return this.prisma.post.create({
+            return await this.prisma.post.create({
                 data: {
                     content: data.content,
                     imageUrl,
-                    userId: data.userId
-                }
+                    userId: data.userId,
+                },
             });
 
         } catch (error) {
+            console.error('Error in create post:', error);
+
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
             throw new InternalServerErrorException('Error in create post');
         }
     }
 
     async getAll(): Promise<Post[] | null> {
         try {
-            return this.prisma.post.findMany();
+            return await this.prisma.post.findMany();
         } catch (error) {
+            console.error('Error fetching posts:', error);
+
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
             throw new InternalServerErrorException('Error fetching posts');
         }
-
     }
 
     async getById(id: string): Promise<Post | null> {
         try {
-            return await this.prisma.post.findUnique({
-                where: { id }
-            });
+            const post = await this.prisma.post.findUnique({ where: { id } });
+
+            if (!post) {
+                throw new NotFoundException('Post not found');
+            }
+
+            return post;
+
         } catch (error) {
-            throw new InternalServerErrorException('Error fetching posts');
+            console.error('Error fetching post by id:', error);
+
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
+            throw new InternalServerErrorException('Error fetching post');
         }
     }
 
-    async updateById(id: string, data: UpdatePostDto, image?: Express.Multer.File): Promise<Post> {
+    async updateById(id: string, data: UpdatePostDto, image?: Express.Multer.File
+    ): Promise<Post> {
         try {
             const existingPost = await this.prisma.post.findUnique({ where: { id } });
 
@@ -72,20 +94,24 @@ export class PostService {
                 imageUrl = await this.s3.uploadFile(image);
             }
 
-            const updated = await this.prisma.post.update({
+            const updateData: any = {};
+            if (data.content !== undefined) updateData.content = data.content;
+            if (imageUrl) updateData.imageUrl = imageUrl;
+
+            const updatedPost = await this.prisma.post.update({
                 where: { id },
-                data: {
-                    ...data,
-                    ...(imageUrl && { imageUrl }),
-                },
+                data: updateData,
             });
 
-            return updated;
-
+            return updatedPost;
         } catch (error) {
-            throw new InternalServerErrorException('Erro in update post');
+            console.error('Error in update post:', error);
+            if (error instanceof HttpException) throw error;
+            throw new InternalServerErrorException('Error in update post');
         }
     }
+
+
 
     async deleteById(id: string): Promise<Post> {
         try {
@@ -97,18 +123,21 @@ export class PostService {
 
             if (existingPost.imageUrl) {
                 const key = existingPost.imageUrl.split('/').pop();
-                if (key) await this.s3.deleteFile(key);
+                if (key) {
+                    await this.s3.deleteFile(key);
+                }
             }
 
-            return this.prisma.post.delete({
-                where: { id },
-            });
+            return await this.prisma.post.delete({ where: { id } });
 
         } catch (error) {
-            console.error(error);
+            console.error('Error in delete post:', error);
+
+            if (error instanceof HttpException) {
+                throw error;
+            }
+
             throw new InternalServerErrorException('Error in delete post');
         }
     }
-
-
 }
