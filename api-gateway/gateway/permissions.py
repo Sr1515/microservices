@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import AuthenticationFailed
-from .views.decode import decode_token_simplejwt
+from .utils.decodeToken import decode_token_simplejwt
 
 class HasValidJWT(BasePermission):
     def has_permission(self, request, view):

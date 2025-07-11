@@ -1,11 +1,9 @@
 import os
 import requests
 import environ
-from .decode import decode_token_simplejwt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from ..permissions import HasValidJWT
-
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = environ.Env()
