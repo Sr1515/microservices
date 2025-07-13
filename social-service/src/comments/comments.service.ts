@@ -2,25 +2,40 @@ import { Injectable, InternalServerErrorException, NotFoundException } from "@ne
 import { Comment } from "generated/prisma";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UpdateCommentDto } from "./dtos/update-comment.dto";
+import { RabbitmqService } from "src/rabbitmq/rabbitmq.service";
 
 @Injectable()
 export class CommentService {
 
     constructor(
         private prisma: PrismaService,
+        private readonly rabbitmqService: RabbitmqService,
     ) { }
 
     async create(data: { content: string; postId: string; userId: string }): Promise<Comment | null> {
         try {
-            return this.prisma.comment.create({
+            const comment = await this.prisma.comment.create({
                 data: {
                     content: data.content,
                     postId: data.postId,
                     userId: data.userId,
                 },
             });
+
+            try {
+                await this.rabbitmqService.emitEvent('post.commented', {
+                    userId: data.userId,
+                    postId: data.postId,
+                    comment: data.content,
+                    commentId: comment.id,
+                });
+            } catch (error) {
+                console.error('Erro ao emitir evento post.commented:', error);
+            }
+
+            return comment;
         } catch (error) {
-            throw new InternalServerErrorException('Error in create Comment')
+            throw new InternalServerErrorException('Erro ao criar comentário');
         }
     }
 

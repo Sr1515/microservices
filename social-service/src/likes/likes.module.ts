@@ -4,6 +4,7 @@ import { AuthModule } from 'src/auth/guards/auth.module';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LikeService } from './likes.service';
 import { LikeController } from './likes.controller';
+import { RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
 
 @Module({
     imports: [
@@ -11,6 +12,6 @@ import { LikeController } from './likes.controller';
         AuthModule,
     ],
     controllers: [LikeController],
-    providers: [LikeService, PrismaService],
+    providers: [LikeService, PrismaService, RabbitmqService],
 })
 export class LikesModule { }

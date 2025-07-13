@@ -1,6 +1,9 @@
 build: 
 	docker compose up --build --remove-orphans -d
 
+run-consumer:
+	python3 manage.py runconsumer
+
 logs:
 	docker compose logs -f
 
